@@ -1,4 +1,4 @@
-{"source_line": 7, "motif": "title vide ou de type invalide"}
-{"source_line": 8, "motif": "date calendaire invalide : '2026-02-30'"}
-{"source_line": 9, "motif": "période invalide : 'soir'"}
-{"source_line": 12, "motif": "JSON malformé"}
+{"source_line": 7, "motif": "title empty or invalid type"}
+{"source_line": 8, "motif": "invalid calendar date: '2026-02-30'"}
+{"source_line": 9, "motif": "invalid period: 'soir'"}
+{"source_line": 12, "motif": "malformed JSON"}

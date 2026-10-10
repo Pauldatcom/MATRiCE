@@ -1,23 +1,23 @@
-# Tableau des scénarios — F2 (PlanningList)
+# Scenario table — F2 (PlanningList)
 
-| Scénario | Entrée | Attendu | Risque couvert |
+| Scenario | Input | Expected | Risk covered |
 |---|---|---|---|
-| Chargement | Rendu, `loadSessions` renvoie une promesse en attente | `role="status"` « Chargement… » visible | Aucun état perçu pendant l'attente (UI figée/silencieuse) |
-| Succès | Résolution avec les 6 séances | Titres affichés dans une liste, chargement disparu | Données reçues non affichées / chargement qui ne finit pas |
-| Filtre A (+ accessibilité) | Atteinte du `<select>` au clavier (Tab) puis sélection de « Groupe A » | `loadSessions({ group: 'A' })` appelé ; titres A + Promotion affichés ; titres B absents ; `combobox` de nom accessible « Groupe » | Mauvais groupe demandé / fuite de séances B / filtre inutilisable au clavier / nom accessible absent |
-| Résultat vide | Résolution avec `[]` | Message explicite « Aucune séance… », ancien résultat absent | Réponse vide confondue avec un chargement ou avec le résultat précédent |
-| Erreur puis nouvelle tentative | Rejet de la promesse | `role="alert"` visible + bouton « Réessayer » ; au clic, `loadSessions({ group })` relancé et les résultats reviennent | Rejet non géré (promesse « swallowed », UI figée), impossible de recouvrer |
-| Réponses désordonnées | Deux demandes successives (`all` puis `A`), résolution dans l'ordre inverse | Le rendu conserve le résultat de la demande la plus récente (A), pas celui de la première | Effet de course : réponse tardive d'une demande obsolète qui écrase le résultat courant |
+| Loading | Render, `loadSessions` returns a pending promise | `role="status"` "Loading..." visible | No perceived state during wait (frozen/silent UI) |
+| Success | Resolve with 6 sessions | Titles displayed in a list, loading gone | Received data not displayed / loading never ends |
+| Filter A (+ accessibility) | Reach `<select>` via keyboard (Tab) then select "Group A" | `loadSessions({ group: 'A' })` called; A + Promotion titles shown; B titles absent; `combobox` with accessible name "Group" | Wrong group requested / B sessions leaking / filter unusable via keyboard / accessible name missing |
+| Empty result | Resolve with `[]` | Explicit message "No sessions...", old result absent | Empty response confused with loading or previous result |
+| Error then retry | Promise rejected | `role="alert"` visible + "Retry" button; on click, `loadSessions({ group })` re-triggered and results recovered | Unhandled rejection (swallowed promise, frozen UI), no recovery |
+| Out-of-order responses | Two successive requests (`all` then `A`), resolved in reverse order | Render keeps the result of the most recent request (A), not the first | Race condition: late response from an obsolete request overwriting the current result |
 
-## Corrections apportées (lien scénario → correction)
+## Corrections applied (scenario -> correction)
 
-- **Résultat vide** : ajout d'un message `<p>Aucune séance pour ce groupe.</p>` quand `!loading && !error && items.length === 0`. Avant, une réponse `[]` laissait une `<ul>` vide sans signal.
-- **Erreur puis nouvelle tentative** : ajout d'un état `error` + `.catch` sur la promesse, affichage `role="alert"`, et bouton « Réessayer » qui incrémente un compteur `attempt` (dépendance de l'`useEffect`) pour relancer la même demande. Avant, un rejet restait non traité (promesse avaleuse d'erreur, `loading` figé à `true`).
-- **Réponses désordonnées** : ajout d'un garde `let active = true` + `return () => { active = false; }` dans l'`useEffect` ; `setItems`/`setLoading` ne s'appliquent que si le gestionnaire est encore actif. Avant, une réponse tardite d'un groupe précédent écrasait le résultat courant.
+- **Empty result**: added `<p>No sessions for this group.</p>` when `!loading && !error && items.length === 0`. Before, a `[]` response left an empty `<ul>` with no signal.
+- **Error then retry**: added `error` state + `.catch` on the promise, `role="alert"` display, and "Retry" button that increments an `attempt` counter (`useEffect` dependency) to re-trigger the same request. Before, a rejection went unhandled (swallowed promise, `loading` stuck at `true`).
+- **Out-of-order responses**: added `let active = true` + `return () => { active = false; }` in `useEffect`; `setItems`/`setLoading` only apply if the handler is still active. Before, a late response from a previous group overwrote the current result.
 
-## Limites de la stratégie
+## Strategy limitations
 
-- **jsdom ne simule pas la navigation native `<select>` au clavier** (Flèche bas / haut). On prouve le nom accessible « Groupe » (`getByRole('combobox', { name: 'Groupe' })`), l'atteinte par `Tab` (`toHaveFocus`) et le changement de valeur via `selectOptions`. La navigation native par flèches reste à valider dans un navigateur réel.
-- **Les promesses rejetées ne sont pas masquées** : le composant attrape l'erreur et l'affiche (`role="alert"`) ; les tests déclenchent un vrai rejet via `deferred().reject(new Error(...))`.
-- **Pas de snapshots ni de couverture seuls** : chaque test observe le rendu (rôles ARIA, textes, présence/absence), pas uniquement la structure ou le % de couverture.
-- **Périmètre** : aucun backend, aucune base de données, pas d'application complète — `loadSessions` est injectée en prop et doublée dans les tests via `deferred()`.
+- **jsdom does not simulate native `<select>` keyboard navigation** (arrow up/down). We prove the accessible name "Group" (`getByRole('combobox', { name: 'Group' })`), reachability via `Tab` (`toHaveFocus`), and value change via `selectOptions`. Native arrow navigation remains to be validated in a real browser.
+- **Rejected promises are not hidden**: the component catches and displays the error (`role="alert"`); tests trigger a real rejection via `deferred().reject(new Error(...))`.
+- **No snapshots or coverage alone**: every test observes the rendered output (ARIA roles, text, presence/absence), not just structure or coverage %.
+- **Scope**: no backend, no database, no full application — `loadSessions` is injected as a prop and stubbed in tests via `deferred()`.

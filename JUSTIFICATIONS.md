@@ -1,56 +1,59 @@
-# Justifications — MATRICE WEB2 Rattrapage
+# Justifications — MATRICE WEB2 Resit
 
-## F2 — Tests front
+## F2 — Front-end testing
 
-### Defauts identifiés dans le composant initial
+### Defects identified in the initial component
 
-Le composant `PlanningList.initial.jsx` presentait trois defauts :
+The `PlanningList.initial.jsx` component had three defects:
 
-1. **Pas de gestion d'erreur** : un rejet de `loadSessions` n'etait pas attrape.
-   - `loading` restait `true` indefiniment (l'UI se figeait).
-   - Aucun message d'erreur visible.
-   - Aucun moyen de relancer la demande.
+1. **No error handling**: a rejection from `loadSessions` was not caught.
+   - `loading` stayed `true` indefinitely (UI froze).
+   - No visible error message.
+   - No way to retry the request.
 
-2. **Condition de course** : lors d'un changement rapide de groupe, la reponse
-   tardive d'une demande precedente pouvait ecraser le resultat de la demande
-   la plus recente (pas de garde anti-reponse-perimee).
+2. **Race condition**: when switching groups quickly, a late response from a
+   previous request could overwrite the result of the most recent one (no
+   stale-response guard).
 
-3. **Resultat vide muet** : une reponse `[]` produisait une `<ul>` vide sans
-   message explicite, laissant l'utilisateur sans feedback.
+3. **Silent empty result**: a `[]` response produced an empty `<ul>` with no
+   explicit message, leaving the user without feedback.
 
-### Corrections minimales appliquees
+### Minimal corrections applied
 
-| Defaut | Correction | Risque couvert |
+| Defect | Correction | Risk covered |
 |---|---|---|
-| Pas de gestion d'erreur | `.catch` + etat `error` + affichage `role="alert"` + bouton « Réessayer » (relance via `attempt`) | Rejet non gere (promesse « swallowed », UI figee), impossibilite de recouvrer |
-| Condition de course | `let active = true` + cleanup `() => { active = false }` dans l'`useEffect` ; `setItems`/`setLoading` seulement si `active` | Reponse tardive d'une demande obsolete qui ecrase le resultat courant |
-| Resultat vide muet | Message `<p>Aucune seance pour ce groupe.</p>` quand `!loading && !error && items.length === 0` | Reponse vide confondue avec un chargement ou un resultat precedent |
+| No error handling | `.catch` + `error` state + `role="alert"` display + "Retry" button (re-trigger via `attempt`) | Unhandled rejection (swallowed promise, frozen UI), no recovery |
+| Race condition | `let active = true` + cleanup `() => { active = false }` in `useEffect`; `setItems`/`setLoading` only if `active` | Late response from an obsolete request overwriting the current result |
+| Silent empty result | `<p>No sessions for this group.</p>` when `!loading && !error && items.length === 0` | Empty response confused with loading or previous result |
 
-### Tests (6 scenarios + accessibilite)
+### Tests (6 scenarios + accessibility)
 
-| Test | Scenario couvert | Rouge sur initial | Vert apres correction |
+| Test | Scenario covered | Red on initial | Green after correction |
 |---|---|---|---|
-| Chargement | Etat de chargement perceptible (`role="status"`) | vert | vert |
-| Succes | Titres affiches, chargement disparu | vert | vert |
-| Filtre A + accessibilite | Bon groupe demande, A+Promotion sans B, nom accessible « Groupe », focus clavier | vert | vert |
-| Resultat vide | Message explicite, ancien resultat absent | rouge | vert |
-| Erreur puis retry | Erreur visible, « Réessayer » relance et retrouve | rouge | vert |
-| Reponses desordonnees | La reponse tardive ne remplace pas la plus recente | rouge | vert |
+| Loading | Loading state perceptible (`role="status"`) | green | green |
+| Success | Titles displayed, loading gone | green | green |
+| Filter A + accessibility | Correct group requested, A+Promotion without B, accessible name "Group", keyboard focus | green | green |
+| Empty result | Explicit message, old result absent | red | green |
+| Error then retry | Visible error, "Retry" re-triggers and recovers | red | green |
+| Out-of-order responses | Late response does not replace the most recent | red | green |
 
-### Limites de la strategie
+### Strategy limitations
 
-- **jsdom ne simule pas la navigation native `<select>` au clavier** (Fleche bas/haut).
-  Le test prouve le nom accessible « Groupe », l'atteinte par `Tab` et le changement
-  de valeur via `selectOptions`. La navigation native par fleches reste a valider en navigateur reel.
-- **Les promesses rejetees ne sont pas masquees** : le composant attrape et affiche l'erreur.
-- **Pas de snapshots ni de couverture seuls** : chaque test observe le rendu (roles ARIA, textes, presence/absence).
-- **Perimetre** : aucun backend, pas de base de donnees, `loadSessions` injectee en prop et doublee dans les tests.
+- **jsdom does not simulate native `<select>` keyboard navigation** (arrow up/down).
+  The test proves the accessible name "Group", reachability via `Tab` (`toHaveFocus`),
+  and value change via `selectOptions`. Native arrow navigation remains to be validated
+  in a real browser.
+- **Rejected promises are not hidden**: the component catches and displays the error.
+- **No snapshots or coverage alone**: every test observes the rendered output
+  (ARIA roles, text, presence/absence).
+- **Scope**: no backend, no database, no full application — `loadSessions` is injected
+  as a prop and stubbed in tests via `deferred()`.
 
-## I3 — Structuration de flux
+## I3 — Stream structuring
 
 ### Pipeline
 
-Lecture -> validation -> normalisation -> deduplication -> sortie, ligne par ligne, en streaming.
+Read -> validate -> normalize -> deduplicate -> output, line by line, streamed.
 
 ### Invariant
 
@@ -58,35 +61,33 @@ Lecture -> validation -> normalisation -> deduplication -> sortie, ligne par lig
 lus = acceptes + rejets + doublons
 ```
 
-Chaque ligne non vide est comptee dans `lus` exactement une fois, puis rangee dans
-exactement une categorie. L'invariant est asserte dans le code et verifie par les tests.
+Every non-empty line is counted in `lus` exactly once, then placed in exactly one
+category. The invariant is asserted in code and verified by tests.
 
-Sur `seances.ndjson` : `lus=12, acceptes=6, rejets=4, doublons=2` -> `12 = 6 + 4 + 2`.
+On `seances.ndjson`: `lus=12, acceptes=6, rejets=4, doublons=2` -> `12 = 6 + 4 + 2`.
 
-### Memoire
+### Memory
 
-- Lecture en streaming (une ligne a la fois, fichier non charge en entier).
-- Deduplication via un `set` des identifiants acceptes (O(u), u = ids uniques valides).
-- Croissance discutee : pour un volume massif, alternatives envisageables (fenetre glissante,
-  filtre de Bloom, table externe). Dans le perimetre du rattrapage, un `set` reste la
-  solution la plus simple et exacte.
+- Streamed reading (one line at a time, file never fully loaded).
+- Deduplication via a `set` of accepted ids (O(u), u = unique valid ids).
+- Growth discussed: for massive volume, alternatives (sliding window, Bloom filter,
+  external table). Within the resit scope, a `set` remains the simplest exact solution.
 
-### Determinisme
+### Determinism
 
-Aucune operation dependante du fuseau horaire : dates via `datetime.date` (calendrier pur,
-sans `tzinfo`, sans `today()`/`now()`). Le meme fichier produit le meme resultat sur
-n'importe quelle machine.
+No timezone-dependent operations: dates via `datetime.date` (pure calendar, no
+`tzinfo`, no `today()`/`now()`). The same file produces the same result on any machine.
 
-### Tests (9 cas)
+### Tests (9 cases)
 
-| Test | Couvre |
+| Test | Covers |
 |---|---|
-| `test_entree_valide_normalisee` | Entree valide + normalisation (date, period, status) |
-| `test_date_invalide` | Date non calendaire (2026-02-30) |
-| `test_periode_invalide` | Periode hors domaine (`soir`) |
-| `test_doublon` | Doublon -> `doublons`, ni accepte ni rejete |
-| `test_json_malforme` | JSON tronque -> rejet « JSON malforme » |
-| `test_ligne_vide_ignoree_mais_source_line_conservee` | Ligne vide ignoree + numerotation conservee |
-| `test_poursuite_apres_ligne_incorrecte` | Poursuite du traitement apres une ligne incorrecte |
-| `test_fichier_fourni` | Fichier `seances.ndjson` complet + invariant |
-| `test_determinisme` | Deux runs identiques -> meme resultat |
+| `test_valid_entry_normalized` | Valid entry + normalization (date, period, status) |
+| `test_invalid_date` | Non-calendar date (2026-02-30) |
+| `test_invalid_period` | Period out of domain (`soir`) |
+| `test_duplicate` | Duplicate -> `doublons`, neither accepted nor rejected |
+| `test_malformed_json` | Truncated JSON -> rejection "malformed JSON" |
+| `test_empty_line_ignored_source_line_preserved` | Empty line ignored + physical numbering preserved |
+| `test_continuation_after_bad_line` | Processing continues after an incorrect line |
+| `test_provided_file` | Full `seances.ndjson` fixture + invariant |
+| `test_determinism` | Two identical runs -> same result |
