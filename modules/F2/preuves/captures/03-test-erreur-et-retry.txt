@@ -1,8 +1,8 @@
 
  RUN  v2.1.9 /Users/paul.compagnon/Documents/private/cours/MATRiCE/modules/F2
 
- ❯ src/components/PlanningList/PlanningList.test.jsx (6 tests | 1 failed | 5 skipped) 1032ms
-   × PlanningList > Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats 1031ms
+ ❯ src/components/PlanningList/PlanningList.test.jsx (6 tests | 1 failed | 5 skipped) 1040ms
+   × PlanningList > Error then retry: a rejection produces a visible error, "Retry" re-triggers the same request and recovers results 1038ms
      → Unable to find role="alert"
 
 Ignored nodes: comments, script, style
@@ -13,22 +13,22 @@ Ignored nodes: comments, script, style
         Planning
       </h1>
       <select
-        aria-label="Groupe"
+        aria-label="Group"
       >
         <option
           value="all"
         >
-          Tous
+          All
         </option>
         <option
           value="A"
         >
-          Groupe A
+          Group A
         </option>
         <option
           value="B"
         >
-          Groupe B
+          Group B
         </option>
         <option
           value="Promotion"
@@ -39,7 +39,7 @@ Ignored nodes: comments, script, style
       <p
         role="status"
       >
-        Chargement...
+        Loading...
       </p>
     </section>
   </div>
@@ -55,22 +55,22 @@ Ignored nodes: comments, script, style
           Planning
         </h1>
         <select
-          aria-label="Groupe"
+          aria-label="Group"
         >
           <option
             value="all"
           >
-            Tous
+            All
           </option>
           <option
             value="A"
           >
-            Groupe A
+            Group A
           </option>
           <option
             value="B"
           >
-            Groupe B
+            Group B
           </option>
           <option
             value="Promotion"
@@ -81,7 +81,7 @@ Ignored nodes: comments, script, style
         <p
           role="status"
         >
-          Chargement...
+          Loading...
         </p>
       </section>
     </div>
@@ -90,7 +90,7 @@ Ignored nodes: comments, script, style
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
- FAIL  src/components/PlanningList/PlanningList.test.jsx > PlanningList > Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats
+ FAIL  src/components/PlanningList/PlanningList.test.jsx > PlanningList > Error then retry: a rejection produces a visible error, "Retry" re-triggers the same request and recovers results
 TestingLibraryElementError: Unable to find role="alert"
 
 Ignored nodes: comments, script, style
@@ -101,22 +101,22 @@ Ignored nodes: comments, script, style
         Planning
       </h1>
       <select
-        aria-label="Groupe"
+        aria-label="Group"
       >
         <option
           value="all"
         >
-          Tous
+          All
         </option>
         <option
           value="A"
         >
-          Groupe A
+          Group A
         </option>
         <option
           value="B"
         >
-          Groupe B
+          Group B
         </option>
         <option
           value="Promotion"
@@ -127,7 +127,7 @@ Ignored nodes: comments, script, style
       <p
         role="status"
       >
-        Chargement...
+        Loading...
       </p>
     </section>
   </div>
@@ -143,22 +143,22 @@ Ignored nodes: comments, script, style
           Planning
         </h1>
         <select
-          aria-label="Groupe"
+          aria-label="Group"
         >
           <option
             value="all"
           >
-            Tous
+            All
           </option>
           <option
             value="A"
           >
-            Groupe A
+            Group A
           </option>
           <option
             value="B"
           >
-            Groupe B
+            Group B
           </option>
           <option
             value="Promotion"
@@ -169,7 +169,7 @@ Ignored nodes: comments, script, style
         <p
           role="status"
         >
-          Chargement...
+          Loading...
         </p>
       </section>
     </div>
@@ -211,7 +211,7 @@ Error: boom
  ❯ startTests node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3
 
 This error originated in "src/components/PlanningList/PlanningList.test.jsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
-The latest test that might've caused the error is "Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats". It might mean one of the following:
+The latest test that might've caused the error is "Error then retry: a rejection produces a visible error, "Retry" re-triggers the same request and recovers results". It might mean one of the following:
 - The error was thrown, while Vitest was running this test.
 - If the error occurred after the test had been completed, this was the last documented test before it was thrown.
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
@@ -219,6 +219,6 @@ The latest test that might've caused the error is "Erreur puis nouvelle tentativ
  Test Files  1 failed (1)
       Tests  1 failed | 5 skipped (6)
      Errors  1 error
-   Start at  17:57:09
-   Duration  3.32s (transform 98ms, setup 294ms, collect 196ms, tests 1.03s, environment 740ms, prepare 253ms)
+   Start at  18:06:57
+   Duration  2.60s (transform 73ms, setup 136ms, collect 144ms, tests 1.04s, environment 719ms, prepare 148ms)
 

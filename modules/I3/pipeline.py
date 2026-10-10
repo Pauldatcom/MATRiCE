@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""I3 - Structuration de flux.
+"""I3 - Stream structuring.
 
-Pipeline: lecture -> validation -> normalisation -> deduplication -> sortie.
+Pipeline: read -> validate -> normalize -> deduplicate -> output.
 
 Usage:
-    python3 pipeline.py [entree] [acceptes] [rejets] [stats]
+    python3 pipeline.py [input] [acceptes] [rejets] [stats]
 
-Commande non interactive. Le meme fichier produit toujours le meme resultat,
-sans dependance au fuseau horaire de la machine (dates en arithmetique
-calendaire pure via datetime.date, pas d'operation locale).
+Non-interactive command. The same file always produces the same result,
+with no timezone dependency (dates as pure calendar arithmetic via
+datetime.date, no local operations).
 """
 
 from __future__ import annotations
@@ -19,139 +19,139 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-DOMAINES = {"web", "data", "ia", "design", "marketing", "cyber", "system", "projet"}
-GROUPES = {"A", "B", "Promotion"}
+DOMAINS = {"web", "data", "ia", "design", "marketing", "cyber", "system", "projet"}
+GROUPS = {"A", "B", "Promotion"}
 MODES = {"DG", "CE", "AUTO"}
-PERIODES = {"am": "am", "matin": "am", "pm": "pm", "apres-midi": "pm", "après-midi": "pm"}
-STATUTS = {
+PERIODS = {"am": "am", "matin": "am", "pm": "pm", "apres-midi": "pm", "après-midi": "pm"}
+STATUSES = {
     "propose": "proposed",
     "proposed": "proposed",
     "confirme": "confirmed",
     "confirmed": "confirmed",
 }
-FORMATEURS = {"t1", "t2", "t3"}
+TEACHERS = {"t1", "t2", "t3"}
 
 
-def normaliser_date(v: str) -> str:
-    """YYYY-MM-DD ou DD/MM/YYYY -> YYYY-MM-DD ; verifie la validite calendaire."""
+def normalize_date(v: str) -> str:
+    """YYYY-MM-DD or DD/MM/YYYY -> YYYY-MM-DD; checks calendar validity."""
     s = v.strip()
     try:
         if "/" in s and "-" not in s:
-            jour, mois, annee = s.split("/")
+            day, month, year = s.split("/")
         elif "-" in s and "/" not in s:
-            annee, mois, jour = s.split("-")
+            year, month, day = s.split("-")
         else:
-            raise ValueError("format de date non reconnu")
-        d = date(int(annee), int(mois), int(jour))
+            raise ValueError("unrecognized date format")
+        d = date(int(year), int(month), int(day))
     except (ValueError, TypeError) as e:
-        raise ValueError(f"date calendaire invalide : {v!r}") from e
+        raise ValueError(f"invalid calendar date: {v!r}") from e
     return d.strftime("%Y-%m-%d")
 
 
-def valider_et_normaliser(obj: Any, source_line: int) -> dict:
-    """Valide et normalise un objet ; leve ValueError(motif) si invalide."""
+def validate_and_normalize(obj: Any, source_line: int) -> dict:
+    """Validates and normalizes an object; raises ValueError(reason) if invalid."""
     if not isinstance(obj, dict):
-        raise ValueError("objet JSON invalide (pas un dictionnaire)")
+        raise ValueError("invalid JSON object (not a dict)")
 
-    id_brut = obj.get("id")
-    if not isinstance(id_brut, str) or id_brut.strip() == "":
-        raise ValueError("id vide ou de type invalide")
-    idn = id_brut.strip()
+    raw_id = obj.get("id")
+    if not isinstance(raw_id, str) or raw_id.strip() == "":
+        raise ValueError("id empty or invalid type")
+    norm_id = raw_id.strip()
 
-    title_brut = obj.get("title")
-    if not isinstance(title_brut, str) or title_brut.strip() == "":
-        raise ValueError("title vide ou de type invalide")
-    titlen = title_brut.strip()
+    raw_title = obj.get("title")
+    if not isinstance(raw_title, str) or raw_title.strip() == "":
+        raise ValueError("title empty or invalid type")
+    norm_title = raw_title.strip()
 
-    date_brut = obj.get("date")
-    if not isinstance(date_brut, str):
-        raise ValueError("date: type invalide")
-    daten = normaliser_date(date_brut)
+    raw_date = obj.get("date")
+    if not isinstance(raw_date, str):
+        raise ValueError("date: invalid type")
+    norm_date = normalize_date(raw_date)
 
-    period_brut = obj.get("period")
-    if not isinstance(period_brut, str):
-        raise ValueError("period: type invalide")
-    periodn = PERIODES.get(period_brut.strip())
-    if periodn is None:
-        raise ValueError(f"période invalide : {period_brut!r}")
+    raw_period = obj.get("period")
+    if not isinstance(raw_period, str):
+        raise ValueError("period: invalid type")
+    norm_period = PERIODS.get(raw_period.strip())
+    if norm_period is None:
+        raise ValueError(f"invalid period: {raw_period!r}")
 
-    group_brut = obj.get("group")
-    if not isinstance(group_brut, str) or group_brut.strip() not in GROUPES:
-        raise ValueError(f"groupe invalide : {group_brut!r}")
-    groupn = group_brut.strip()
+    raw_group = obj.get("group")
+    if not isinstance(raw_group, str) or raw_group.strip() not in GROUPS:
+        raise ValueError(f"invalid group: {raw_group!r}")
+    norm_group = raw_group.strip()
 
-    mode_brut = obj.get("mode")
-    if not isinstance(mode_brut, str) or mode_brut.strip() not in MODES:
-        raise ValueError(f"mode invalide : {mode_brut!r}")
-    moden = mode_brut.strip()
+    raw_mode = obj.get("mode")
+    if not isinstance(raw_mode, str) or raw_mode.strip() not in MODES:
+        raise ValueError(f"invalid mode: {raw_mode!r}")
+    norm_mode = raw_mode.strip()
 
-    domain_brut = obj.get("domain")
-    if not isinstance(domain_brut, str) or domain_brut.strip() not in DOMAINES:
-        raise ValueError(f"domain invalide : {domain_brut!r}")
-    domainn = domain_brut.strip()
+    raw_domain = obj.get("domain")
+    if not isinstance(raw_domain, str) or raw_domain.strip() not in DOMAINS:
+        raise ValueError(f"invalid domain: {raw_domain!r}")
+    norm_domain = raw_domain.strip()
 
-    teacher_brut = obj.get("teacherId")
-    if teacher_brut == "":
-        raise ValueError("teacherId : chaîne vide invalide")
-    if teacher_brut is not None and teacher_brut not in FORMATEURS:
-        raise ValueError(f"teacherId invalide : {teacher_brut!r}")
+    raw_teacher = obj.get("teacherId")
+    if raw_teacher == "":
+        raise ValueError("teacherId: empty string is invalid")
+    if raw_teacher is not None and raw_teacher not in TEACHERS:
+        raise ValueError(f"invalid teacherId: {raw_teacher!r}")
 
-    status_brut = obj.get("status")
-    if not isinstance(status_brut, str):
-        raise ValueError("status: type invalide")
-    if status_brut.strip() not in STATUTS:
-        raise ValueError(f"status invalide : {status_brut!r}")
-    statusn = STATUTS[status_brut.strip()]
+    raw_status = obj.get("status")
+    if not isinstance(raw_status, str):
+        raise ValueError("status: invalid type")
+    if raw_status.strip() not in STATUSES:
+        raise ValueError(f"invalid status: {raw_status!r}")
+    norm_status = STATUSES[raw_status.strip()]
 
-    # Contraintes croisees.
-    if moden == "AUTO":
-        if teacher_brut is not None or statusn != "proposed":
-            raise ValueError("AUTO exige teacherId null et status « proposed »")
-    if statusn == "confirmed" and teacher_brut not in FORMATEURS:
-        raise ValueError("status « confirmed » exige un formateur (teacherId)")
+    # Cross-constraints.
+    if norm_mode == "AUTO":
+        if raw_teacher is not None or norm_status != "proposed":
+            raise ValueError("AUTO requires teacherId null and status 'proposed'")
+    if norm_status == "confirmed" and raw_teacher not in TEACHERS:
+        raise ValueError("status 'confirmed' requires a teacher (teacherId)")
 
     return {
-        "id": idn,
-        "date": daten,
-        "period": periodn,
-        "group": groupn,
-        "mode": moden,
-        "title": titlen,
-        "domain": domainn,
-        "teacherId": teacher_brut,
-        "status": statusn,
+        "id": norm_id,
+        "date": norm_date,
+        "period": norm_period,
+        "group": norm_group,
+        "mode": norm_mode,
+        "title": norm_title,
+        "domain": norm_domain,
+        "teacherId": raw_teacher,
+        "status": norm_status,
         "source_line": source_line,
     }
 
 
-def traiter(entree: Path) -> tuple[list[dict], list[dict], dict]:
+def process(input_path: Path) -> tuple[list[dict], list[dict], dict]:
     acceptes: list[dict] = []
     rejets: list[dict] = []
-    vus: set[str] = set()
+    seen: set[str] = set()
     lus = 0
     doublons = 0
 
-    with entree.open(encoding="utf-8") as f:
-        for no_ligne, brut in enumerate(f, start=1):
-            if brut.strip() == "":
-                # Ligne vide : ignoree, non comptee dans lus, mais source_line conserve.
+    with input_path.open(encoding="utf-8") as f:
+        for line_no, raw in enumerate(f, start=1):
+            if raw.strip() == "":
+                # Empty line: ignored, not counted in lus, but source_line preserved.
                 continue
             lus += 1
             try:
-                obj = json.loads(brut)
+                obj = json.loads(raw)
             except json.JSONDecodeError:
-                rejets.append({"source_line": no_ligne, "motif": "JSON malformé"})
+                rejets.append({"source_line": line_no, "motif": "malformed JSON"})
                 continue
             try:
-                normalise = valider_et_normaliser(obj, no_ligne)
+                normalized = validate_and_normalize(obj, line_no)
             except ValueError as e:
-                rejets.append({"source_line": no_ligne, "motif": str(e)})
+                rejets.append({"source_line": line_no, "motif": str(e)})
                 continue
-            if normalise["id"] in vus:
+            if normalized["id"] in seen:
                 doublons += 1
                 continue
-            vus.add(normalise["id"])
-            acceptes.append(normalise)
+            seen.add(normalized["id"])
+            acceptes.append(normalized)
 
     stats = {
         "lus": lus,
@@ -161,12 +161,12 @@ def traiter(entree: Path) -> tuple[list[dict], list[dict], dict]:
     }
     # Invariant.
     assert stats["lus"] == stats["acceptes"] + stats["rejets"] + stats["doublons"], (
-        f"invariant rompu : {stats}"
+        f"invariant broken: {stats}"
     )
     return acceptes, rejets, stats
 
 
-def ecrire_sorties(
+def write_outputs(
     acceptes: list[dict],
     rejets: list[dict],
     stats: dict,
@@ -187,17 +187,17 @@ def ecrire_sorties(
 
 def main(argv: list[str]) -> int:
     args = argv[1:]
-    entree = Path(args[0]) if len(args) > 0 else Path("seances.ndjson")
-    acceptes = Path(args[1]) if len(args) > 1 else Path("acceptes.ndjson")
-    rejets = Path(args[2]) if len(args) > 2 else Path("rejets.ndjson")
-    stats = Path(args[3]) if len(args) > 3 else Path("stats.json")
+    input_path = Path(args[0]) if len(args) > 0 else Path("seances.ndjson")
+    acceptes_path = Path(args[1]) if len(args) > 1 else Path("acceptes.ndjson")
+    rejets_path = Path(args[2]) if len(args) > 2 else Path("rejets.ndjson")
+    stats_path = Path(args[3]) if len(args) > 3 else Path("stats.json")
 
-    acc, rej, sta = traiter(entree)
-    ecrire_sorties(acc, rej, sta, acceptes, rejets, stats)
+    acc, rej, sta = process(input_path)
+    write_outputs(acc, rej, sta, acceptes_path, rejets_path, stats_path)
     print(
         f"lus={sta['lus']} acceptes={sta['acceptes']} "
         f"rejets={sta['rejets']} doublons={sta['doublons']} "
-        f"-> {acceptes} | {rejets} | {stats}"
+        f"-> {acceptes_path} | {rejets_path} | {stats_path}"
     )
     return 0
 

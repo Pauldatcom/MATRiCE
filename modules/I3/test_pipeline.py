@@ -1,10 +1,8 @@
-"""Tests du pipeline I3 (stdlib unittest).
+"""I3 pipeline tests (stdlib unittest).
 
-Commande: python3 -m unittest -v test_pipeline.py
+Command: python3 -m unittest -v test_pipeline.py
 """
 
-import json
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,9 +10,9 @@ from pathlib import Path
 import pipeline
 
 
-def ecrire(tmp: Path, nom: str, contenu: str) -> Path:
-    p = tmp / nom
-    p.write_text(contenu, encoding="utf-8")
+def write(tmp: Path, name: str, content: str) -> Path:
+    p = tmp / name
+    p.write_text(content, encoding="utf-8")
     return p
 
 
@@ -26,14 +24,14 @@ class PipelineTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._tmp.cleanup()
 
-    def lancer(self, contenu: str):
-        entree = ecrire(self.tmp, "entree.ndjson", contenu)
-        acc, rej, sta = pipeline.traiter(entree)
+    def run_pipeline(self, content: str):
+        entry = write(self.tmp, "entry.ndjson", content)
+        acc, rej, sta = pipeline.process(entry)
         return acc, rej, sta
 
-    # 1. Entree valide.
-    def test_entree_valide_normalisee(self) -> None:
-        acc, rej, sta = self.lancer(
+    # 1. Valid entry.
+    def test_valid_entry_normalized(self) -> None:
+        acc, rej, sta = self.run_pipeline(
             '{"id":"s01","date":"19/10/2026","period":"matin","group":"A",'
             '"mode":"DG","title":"React composants","domain":"web",'
             '"teacherId":"t1","status":"confirme"}\n'
@@ -47,9 +45,9 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(o["id"], "s01")
         self.assertEqual(o["source_line"], 1)
 
-    # 2. Entree invalide : date non calendaire.
-    def test_date_invalide(self) -> None:
-        acc, rej, sta = self.lancer(
+    # 2. Invalid entry: non-calendar date.
+    def test_invalid_date(self) -> None:
+        acc, rej, sta = self.run_pipeline(
             '{"id":"bad","date":"2026-02-30","period":"am","group":"A",'
             '"mode":"DG","title":"x","domain":"web","teacherId":"t1","status":"proposed"}\n'
         )
@@ -58,23 +56,23 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("date", rej[0]["motif"])
         self.assertEqual(rej[0]["source_line"], 1)
 
-    # 2b. Entree invalide : periode hors domaine.
-    def test_periode_invalide(self) -> None:
-        acc, rej, sta = self.lancer(
+    # 2b. Invalid entry: period out of domain.
+    def test_invalid_period(self) -> None:
+        acc, rej, sta = self.run_pipeline(
             '{"id":"bad","date":"2026-10-20","period":"soir","group":"A",'
             '"mode":"DG","title":"x","domain":"web","teacherId":"t1","status":"proposed"}\n'
         )
         self.assertEqual(acc, [])
         self.assertEqual(len(rej), 1)
-        self.assertIn("période", rej[0]["motif"])
+        self.assertIn("period", rej[0]["motif"])
 
-    # 3. Doublon : compteur dedoublons, ni accepte ni rejete.
-    def test_doublon(self) -> None:
-        ligne = (
+    # 3. Duplicate: counted in doublons, neither accepted nor rejected.
+    def test_duplicate(self) -> None:
+        line = (
             '{"id":"s01","date":"2026-10-19","period":"am","group":"A",'
             '"mode":"DG","title":"a","domain":"web","teacherId":"t1","status":"confirmed"}\n'
         )
-        acc, rej, sta = self.lancer(ligne + ligne)
+        acc, rej, sta = self.run_pipeline(line + line)
         self.assertEqual(len(acc), 1)
         self.assertEqual(rej, [])
         self.assertEqual(sta["doublons"], 1)
@@ -82,40 +80,40 @@ class PipelineTests(unittest.TestCase):
         # invariant
         self.assertEqual(sta["lus"], sta["acceptes"] + sta["rejets"] + sta["doublons"])
 
-    # 4. JSON malforme.
-    def test_json_malforme(self) -> None:
-        acc, rej, sta = self.lancer('{"id":"bad4","title":"JSON tronqué"\n')
+    # 4. Malformed JSON.
+    def test_malformed_json(self) -> None:
+        acc, rej, sta = self.run_pipeline('{"id":"bad4","title":"truncated JSON"\n')
         self.assertEqual(acc, [])
         self.assertEqual(len(rej), 1)
-        self.assertEqual(rej[0]["motif"], "JSON malformé")
+        self.assertEqual(rej[0]["motif"], "malformed JSON")
         self.assertEqual(rej[0]["source_line"], 1)
 
-    # 5. Ligne vide ignoree mais numerotation conservee.
-    def test_ligne_vide_ignoree_mais_source_line_conservee(self) -> None:
-        ligne_vide = (
+    # 5. Empty line ignored but line numbering preserved.
+    def test_empty_line_ignored_source_line_preserved(self) -> None:
+        valid_line = (
             '{"id":"s01","date":"2026-10-19","period":"am","group":"A",'
             '"mode":"DG","title":"a","domain":"web","teacherId":"t1","status":"confirmed"}\n'
         )
-        contenu = "\n" + ligne_vide + "\n\n" + ligne_vide
-        acc, rej, sta = self.lancer(contenu)
-        # 2 lignes non vides -> lus = 2 ; lignes vides ignorees.
+        content = "\n" + valid_line + "\n\n" + valid_line
+        acc, rej, sta = self.run_pipeline(content)
+        # 2 non-empty lines -> lus = 2; empty lines ignored.
         self.assertEqual(sta["lus"], 2)
-        # La 1re ligne non vide est la ligne physique 2.
+        # First non-empty line is physical line 2.
         self.assertEqual(acc[0]["source_line"], 2)
-        # Le doublon est la ligne physique 4.
+        # The duplicate is physical line 4.
         self.assertEqual(sta["doublons"], 1)
         self.assertEqual(len(acc), 1)
         self.assertEqual(rej, [])
         self.assertEqual(sta["lus"], sta["acceptes"] + sta["rejets"] + sta["doublons"])
 
-    # 6. Poursuite du traitement apres une ligne incorrecte.
-    def test_poursuite_apres_ligne_incorrecte(self) -> None:
-        valide = (
+    # 6. Processing continues after an incorrect line.
+    def test_continuation_after_bad_line(self) -> None:
+        valid = (
             '{"id":"s02","date":"2026-10-19","period":"am","group":"B",'
             '"mode":"DG","title":"b","domain":"web","teacherId":"t2","status":"confirmed"}\n'
         )
-        contenu = "pas du tout du JSON\n" + valide
-        acc, rej, sta = self.lancer(contenu)
+        content = "not JSON at all\n" + valid
+        acc, rej, sta = self.run_pipeline(content)
         self.assertEqual(len(rej), 1)
         self.assertEqual(len(acc), 1)
         self.assertEqual(acc[0]["id"], "s02")
@@ -123,11 +121,11 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(sta["lus"], 2)
         self.assertEqual(sta["lus"], sta["acceptes"] + sta["rejets"] + sta["doublons"])
 
-    # 7. Invariant sur le fichier fourni (seances.ndjson).
-    def test_fichier_fourni(self) -> None:
-        ici = Path(__file__).resolve().parent
-        entree = ici / "seances.ndjson"
-        acc, rej, sta = pipeline.traiter(entree)
+    # 7. Invariant on the provided file (seances.ndjson).
+    def test_provided_file(self) -> None:
+        here = Path(__file__).resolve().parent
+        entry = here / "seances.ndjson"
+        acc, rej, sta = pipeline.process(entry)
         self.assertEqual(sta["lus"], 12)
         self.assertEqual(sta["acceptes"], 6)
         self.assertEqual(sta["doublons"], 2)
@@ -136,12 +134,12 @@ class PipelineTests(unittest.TestCase):
         ids = [o["id"] for o in acc]
         self.assertEqual(ids, ["s01", "s02", "s03", "s04", "s05", "s06"])
 
-    # 8. Determinisme : deux runs donnent le meme resultat.
-    def test_determinisme(self) -> None:
-        ici = Path(__file__).resolve().parent
-        entree = ici / "seances.ndjson"
-        a1, r1, s1 = pipeline.traiter(entree)
-        a2, r2, s2 = pipeline.traiter(entree)
+    # 8. Determinism: two runs produce the same result.
+    def test_determinism(self) -> None:
+        here = Path(__file__).resolve().parent
+        entry = here / "seances.ndjson"
+        a1, r1, s1 = pipeline.process(entry)
+        a2, r2, s2 = pipeline.process(entry)
         self.assertEqual((a1, r1, s1), (a2, r2, s2))
 
 

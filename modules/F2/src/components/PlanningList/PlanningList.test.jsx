@@ -9,14 +9,14 @@ const groupA = () =>
   sessions.filter((s) => s.group === 'A' || s.group === 'Promotion');
 
 describe('PlanningList', () => {
-  it('Chargement: tant que la promesse est en attente, un état de chargement est perceptible', () => {
+  it('Loading: while the promise is pending, a loading state is perceptible', () => {
     const { promise } = deferred();
     const loadSessions = vi.fn(() => promise);
     render(<PlanningList loadSessions={loadSessions} />);
-    expect(screen.getByRole('status')).toHaveTextContent(/chargement/i);
+    expect(screen.getByRole('status')).toHaveTextContent(/loading/i);
   });
 
-  it('Succès: après résolution, les titres sont affichés et le chargement disparaît', async () => {
+  it('Success: after resolution, titles are displayed and loading disappears', async () => {
     const { promise, resolve } = deferred();
     const loadSessions = vi.fn(() => promise);
     render(<PlanningList loadSessions={loadSessions} />);
@@ -28,7 +28,7 @@ describe('PlanningList', () => {
     expect(within(list).getByText('React composants')).toBeInTheDocument();
   });
 
-  it('Filtre A + accessibilité: demande le groupe A, affiche A et Promotion sans B ; nom accessible « Groupe » et filtre au clavier', async () => {
+  it('Filter A + accessibility: requests group A, shows A and Promotion without B; accessible name "Group" and keyboard filter', async () => {
     const { promise: p1, resolve: r1 } = deferred();
     const loadSessions = vi.fn(() => p1);
     const user = userEvent.setup();
@@ -41,7 +41,7 @@ describe('PlanningList', () => {
     const { promise: p2, resolve: r2 } = deferred();
     loadSessions.mockReturnValueOnce(p2);
 
-    const select = screen.getByRole('combobox', { name: 'Groupe' });
+    const select = screen.getByRole('combobox', { name: 'Group' });
     await user.tab();
     expect(select).toHaveFocus();
     await userEvent.selectOptions(select, 'A');
@@ -58,7 +58,7 @@ describe('PlanningList', () => {
     expect(screen.queryByText('Revue de projet')).not.toBeInTheDocument();
   });
 
-  it('Résultat vide: une réponse [] produit un message explicite, sans ancien résultat', async () => {
+  it('Empty result: a [] response produces an explicit message, without old result', async () => {
     const { promise: p1, resolve: r1 } = deferred();
     const loadSessions = vi.fn(() => p1);
     const user = userEvent.setup();
@@ -71,17 +71,17 @@ describe('PlanningList', () => {
     const { promise: p2, resolve: r2 } = deferred();
     loadSessions.mockReturnValueOnce(p2);
     await userEvent.selectOptions(
-      screen.getByRole('combobox', { name: 'Groupe' }),
+      screen.getByRole('combobox', { name: 'Group' }),
       'Promotion',
     );
     r2([]);
     await waitFor(() =>
       expect(screen.queryByText('React composants')).not.toBeInTheDocument(),
     );
-    expect(screen.getByText(/aucune séance/i)).toBeInTheDocument();
+    expect(screen.getByText(/no sessions/i)).toBeInTheDocument();
   });
 
-  it('Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats', async () => {
+  it('Error then retry: a rejection produces a visible error, "Retry" re-triggers the same request and recovers results', async () => {
     const { promise: p1, reject: rej1 } = deferred();
     const loadSessions = vi.fn(() => p1);
     const user = userEvent.setup();
@@ -95,7 +95,7 @@ describe('PlanningList', () => {
     const { promise: p2, resolve: r2 } = deferred();
     loadSessions.mockReturnValueOnce(p2);
     await userEvent.click(
-      screen.getByRole('button', { name: /réessayer/i }),
+      screen.getByRole('button', { name: /retry/i }),
     );
     expect(loadSessions).toHaveBeenLastCalledWith({ group: 'all' });
     r2(sessions);
@@ -105,7 +105,7 @@ describe('PlanningList', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('Réponses désordonnées: la réponse tardive de la première demande ne remplace pas la plus récente', async () => {
+  it('Out-of-order responses: the late response of the first request does not replace the most recent', async () => {
     const d1 = deferred();
     const d2 = deferred();
     const loadSessions = vi.fn();
@@ -114,7 +114,7 @@ describe('PlanningList', () => {
     render(<PlanningList loadSessions={loadSessions} />);
     loadSessions.mockReturnValueOnce(d2.promise);
     await userEvent.selectOptions(
-      screen.getByRole('combobox', { name: 'Groupe' }),
+      screen.getByRole('combobox', { name: 'Group' }),
       'A',
     );
     d2.resolve(groupA());

@@ -19,7 +19,7 @@ export default function PlanningList({ loadSessions }) {
       })
       .catch((err) => {
         if (!active) return;
-        setError(err?.message ?? 'Erreur de chargement');
+        setError(err?.message ?? 'Loading error');
         setLoading(false);
       });
     return () => {
@@ -31,24 +31,24 @@ export default function PlanningList({ loadSessions }) {
     <section>
       <h1>Planning</h1>
       <select
-        aria-label="Groupe"
+        aria-label="Group"
         value={group}
         onChange={(e) => setGroup(e.target.value)}
       >
-        <option value="all">Tous</option>
-        <option value="A">Groupe A</option>
-        <option value="B">Groupe B</option>
+        <option value="all">All</option>
+        <option value="A">Group A</option>
+        <option value="B">Group B</option>
         <option value="Promotion">Promotion</option>
       </select>
 
-      {loading && <p role="status">Chargement...</p>}
+      {loading && <p role="status">Loading...</p>}
       {error && (
         <p role="alert">
-          Erreur : {error} <button onClick={() => setAttempt((a) => a + 1)}>Réessayer</button>
+          Error: {error} <button onClick={() => setAttempt((a) => a + 1)}>Retry</button>
         </p>
       )}
       {!loading && !error && items.length === 0 && (
-        <p>Aucune séance pour ce groupe.</p>
+        <p>No sessions for this group.</p>
       )}
       {!loading && !error && items.length > 0 && (
         <ul>{items.map((s) => <li key={s.id}>{s.title}</li>)}</ul>
