@@ -1,15 +1,15 @@
 # MATRICE — WEB2
 
 **Author**: Paul COMPAGNON
-**Modules**: F2 (Front-end testing) + I3 (Stream structuring)
+**Modules**: F2 + I3
 
 ## Repository structure
 
 ```
 MATRiCE/
 ├── modules/
-│   ├── F2/   — Front-end tests (React + Vitest)
-│   └── I3/   — NDJSON pipeline (Python)
+│   ├── F2/   
+│   └── I3/
 ├── README.md
 ├── JUSTIFICATIONS.md
 └── SOURCES_IA.md
@@ -27,19 +27,14 @@ Test an existing React component (`PlanningList`) and fix its defects in a targe
 ```bash
 cd modules/F2
 pnpm install
-pnpm test          # vitest run (non-interactive)
+pnpm test          
 ```
-
-### Expected results
-- Initial version (`PlanningList.initial.jsx`): 3 red tests (empty result, error/retry, out-of-order responses)
-- Corrected version (`PlanningList.jsx`): 6/6 green
-
 ### Evidence
 Text traces in `modules/F2/preuves/captures/`:
-- `01-tests-rouges-avant-correction.txt` — 3 failures on the initial version
-- `02-tests-verts-apres-correction.txt` — 6/6 passing after correction
-- `03-test-erreur-et-retry.txt` — error/retry scenario (red on initial)
-- `04-test-reponses-dans-le-desordre.txt` — out-of-order scenario (red on initial)
+- `01-tests-rouges-avant-correction.txt` 
+- `02-tests-verts-apres-correction.txt`
+- `03-test-erreur-et-retry.txt` 
+- `04-test-reponses-dans-le-desordre.txt`
 
 ## I3 — Stream structuring
 
@@ -51,14 +46,9 @@ CLI pipeline: read -> validate -> normalize -> deduplicate -> output.
 ### Commands
 ```bash
 cd modules/I3
-python3 pipeline.py                          # generates acceptes.ndjson, rejets.ndjson, stats.json
-python3 -m unittest -v test_pipeline.py      # 9 tests
+python3 pipeline.py                          
+python3 -m unittest -v test_pipeline.py     
 ```
-
-### Expected results
-- `lus=12 acceptes=6 rejets=4 doublons=2` (invariant: 12 = 6 + 4 + 2)
-- 9 unittest cases OK
-
 ## Details
 
 - [Justifications](JUSTIFICATIONS.md) — corrections, risks covered, limitations
