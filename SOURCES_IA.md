@@ -4,9 +4,9 @@
 
 | Tool | Model | Usage |
 |---|---|---|
-| opencode | z-ai/glm-5.2 (OpenRouter) | Development assistance throughout the project |
-| opencode | z-ai/glm-5.3 (OpenRouter) | Development assistance throughout the project |
-| opencode | anthropic/claude-5.5 | Development assistance throughout the project |
+| opencode | z-ai/glm-5.2  | Development assistance  |
+| opencode | z-ai/glm-5.3  | Development assistance |
+| opencode | anthropic/claude-5.5  | Development assistance |
 
 ## Nature of assistance
 
