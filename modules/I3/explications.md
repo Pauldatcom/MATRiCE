@@ -43,7 +43,7 @@ If the number of unique identifiers became very large (millions), this `set` cou
 - use a **Bloom filter** (compact, ~probabilistic) if rare false-positive duplicates are acceptable;
 - offload the set to disk (external table / database) for massive volume.
 
-Within the resit scope (a few dozen sessions), an in-memory `set` remains the simplest, exact, and readable solution.
+Within the assignment scope (a few dozen sessions), an in-memory `set` remains the simplest, exact, and readable solution.
 
 ## Determinism / reproducibility
 

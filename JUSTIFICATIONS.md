@@ -1,4 +1,4 @@
-# Justifications — MATRICE WEB2 Resit
+# Justifications — MATRICE WEB2
 
 ## F2 — Front-end testing
 
@@ -71,7 +71,7 @@ On `seances.ndjson`: `lus=12, acceptes=6, rejets=4, doublons=2` -> `12 = 6 + 4 +
 - Streamed reading (one line at a time, file never fully loaded).
 - Deduplication via a `set` of accepted ids (O(u), u = unique valid ids).
 - Growth discussed: for massive volume, alternatives (sliding window, Bloom filter,
-  external table). Within the resit scope, a `set` remains the simplest exact solution.
+  external table). Within the assignment scope, a `set` remains the simplest exact solution.
 
 ### Determinism
 

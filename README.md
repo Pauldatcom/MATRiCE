@@ -1,4 +1,4 @@
-# MATRICE — WEB2 — Individual resit
+# MATRICE — WEB2
 
 **Author**: Paul COMPAGNON
 **Modules**: F2 (Front-end testing) + I3 (Stream structuring)
@@ -58,15 +58,6 @@ python3 -m unittest -v test_pipeline.py      # 9 tests
 ### Expected results
 - `lus=12 acceptes=6 rejets=4 doublons=2` (invariant: 12 = 6 + 4 + 2)
 - 9 unittest cases OK
-
-## Git workflow
-
-- `main` branch protected (PR required, direct pushes blocked)
-- Merged PRs:
-  1. `chore: structure initiale du depot`
-  2. `feat(F2): tests PlanningList — rouge puis vert`
-  3. `feat(I3): ndjson pipeline — validation, normalization, dedup`
-  4. `docs(F2): preuves — test traces (red/green)`
 
 ## Details
 
