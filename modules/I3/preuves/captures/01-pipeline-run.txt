@@ -1,0 +1,1 @@
+lus=12 acceptes=6 rejets=4 doublons=2 -> acceptes.ndjson | rejets.ndjson | stats.json
