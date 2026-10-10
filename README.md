@@ -30,11 +30,11 @@ pnpm install
 pnpm test          
 ```
 ### Evidence
-Text traces in `modules/F2/preuves/captures/`:
-- `01-tests-rouges-avant-correction.txt` 
-- `02-tests-verts-apres-correction.txt`
-- `03-test-erreur-et-retry.txt` 
-- `04-test-reponses-dans-le-desordre.txt`
+Screenshots in `modules/F2/preuves/captures/`:
+- `01-tests-rouges-avant-correction.png` 
+- `02-tests-verts-apres-correction.png`
+- `03-test-erreur-et-retry.png` 
+- `04-test-reponses-dans-le-desordre.png`
 
 ## I3 — Stream structuring
 
