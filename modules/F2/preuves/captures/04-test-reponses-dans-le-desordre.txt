@@ -1,0 +1,34 @@
+
+ RUN  v2.1.9 /Users/paul.compagnon/Documents/private/cours/MATRiCE/modules/F2
+
+ ❯ src/components/PlanningList/PlanningList.test.jsx (6 tests | 1 failed | 5 skipped) 145ms
+   × PlanningList > Réponses désordonnées: la réponse tardive de la première demande ne remplace pas la plus récente 144ms
+     → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <li>
+  React événements
+</li> instead
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/PlanningList/PlanningList.test.jsx > PlanningList > Réponses désordonnées: la réponse tardive de la première demande ne remplace pas la plus récente
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <li>
+  React événements
+</li> instead
+ ❯ src/components/PlanningList/PlanningList.test.jsx:128:56
+    126|       expect(screen.getByText('React composants')).toBeInTheDocument(),
+    127|     );
+    128|     expect(screen.queryByText('React événements')).not.toBeInTheDocume…
+       |                                                        ^
+    129|   });
+    130| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 skipped (6)
+   Start at  17:57:13
+   Duration  1.47s (transform 63ms, setup 133ms, collect 166ms, tests 145ms, environment 564ms, prepare 58ms)
+

@@ -1,0 +1,224 @@
+
+ RUN  v2.1.9 /Users/paul.compagnon/Documents/private/cours/MATRiCE/modules/F2
+
+ ❯ src/components/PlanningList/PlanningList.test.jsx (6 tests | 1 failed | 5 skipped) 1032ms
+   × PlanningList > Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats 1031ms
+     → Unable to find role="alert"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section>
+      <h1>
+        Planning
+      </h1>
+      <select
+        aria-label="Groupe"
+      >
+        <option
+          value="all"
+        >
+          Tous
+        </option>
+        <option
+          value="A"
+        >
+          Groupe A
+        </option>
+        <option
+          value="B"
+        >
+          Groupe B
+        </option>
+        <option
+          value="Promotion"
+        >
+          Promotion
+        </option>
+      </select>
+      <p
+        role="status"
+      >
+        Chargement...
+      </p>
+    </section>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <section>
+        <h1>
+          Planning
+        </h1>
+        <select
+          aria-label="Groupe"
+        >
+          <option
+            value="all"
+          >
+            Tous
+          </option>
+          <option
+            value="A"
+          >
+            Groupe A
+          </option>
+          <option
+            value="B"
+          >
+            Groupe B
+          </option>
+          <option
+            value="Promotion"
+          >
+            Promotion
+          </option>
+        </select>
+        <p
+          role="status"
+        >
+          Chargement...
+        </p>
+      </section>
+    </div>
+  </body>
+</html>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/PlanningList/PlanningList.test.jsx > PlanningList > Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats
+TestingLibraryElementError: Unable to find role="alert"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <section>
+      <h1>
+        Planning
+      </h1>
+      <select
+        aria-label="Groupe"
+      >
+        <option
+          value="all"
+        >
+          Tous
+        </option>
+        <option
+          value="A"
+        >
+          Groupe A
+        </option>
+        <option
+          value="B"
+        >
+          Groupe B
+        </option>
+        <option
+          value="Promotion"
+        >
+          Promotion
+        </option>
+      </select>
+      <p
+        role="status"
+      >
+        Chargement...
+      </p>
+    </section>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <section>
+        <h1>
+          Planning
+        </h1>
+        <select
+          aria-label="Groupe"
+        >
+          <option
+            value="all"
+          >
+            Tous
+          </option>
+          <option
+            value="A"
+          >
+            Groupe A
+          </option>
+          <option
+            value="B"
+          >
+            Groupe B
+          </option>
+          <option
+            value="Promotion"
+          >
+            Promotion
+          </option>
+        </select>
+        <p
+          role="status"
+        >
+          Chargement...
+        </p>
+      </section>
+    </div>
+  </body>
+</html>
+ ❯ Proxy.waitForWrapper node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ src/components/PlanningList/PlanningList.test.jsx:90:11
+     88|     render(<PlanningList loadSessions={loadSessions} />);
+     89|     rej1(new Error('boom'));
+     90|     await waitFor(() =>
+       |           ^
+     91|       expect(screen.getByRole('alert')).toBeInTheDocument(),
+     92|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: boom
+ ❯ src/components/PlanningList/PlanningList.test.jsx:89:10
+     87|     const user = userEvent.setup();
+     88|     render(<PlanningList loadSessions={loadSessions} />);
+     89|     rej1(new Error('boom'));
+       |          ^
+     90|     await waitFor(() =>
+     91|       expect(screen.getByRole('alert')).toBeInTheDocument(),
+ ❯ node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14
+ ❯ node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11
+ ❯ runWithTimeout node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7
+ ❯ runTest node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17
+ ❯ processTicksAndRejections ../../node:internal/process/task_queues:104:5
+ ❯ runSuite node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runSuite node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15
+ ❯ runFiles node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5
+ ❯ startTests node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3
+
+This error originated in "src/components/PlanningList/PlanningList.test.jsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "Erreur puis nouvelle tentative: un rejet produit une erreur visible, « Réessayer » relance la même demande et retrouve les résultats". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 skipped (6)
+     Errors  1 error
+   Start at  17:57:09
+   Duration  3.32s (transform 98ms, setup 294ms, collect 196ms, tests 1.03s, environment 740ms, prepare 253ms)
+
